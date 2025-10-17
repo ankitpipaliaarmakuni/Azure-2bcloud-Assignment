@@ -21,8 +21,6 @@ This repository contains all necessary components for deploying a Node.js applic
 │   ├── values.yaml          # Configuration values
 │   └── README.md            # Helm chart documentation
 ├── infra/                   # Terraform Infrastructure as Code
-│   ├── modules/             # Reusable modules
-│   │   └── virtual-network/ # VNET module
 │   ├── main.tf              # Main Terraform configuration
 │   ├── variables.tf         # Variable definitions
 │   ├── outputs.tf           # Output definitions

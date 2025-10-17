@@ -105,15 +105,15 @@ variable "use_inline_subnets" {
 variable "subnets" {
   description = "List of subnets to create within the virtual network."
   type = list(object({
-    name                          = string
-    address_prefix                = string
-    security_group_id             = optional(string)
-    default_outbound_access_enabled = optional(bool, true)
-    private_endpoint_network_policies = optional(string, "Disabled")
+    name                                          = string
+    address_prefix                                = string
+    security_group_id                             = optional(string)
+    default_outbound_access_enabled               = optional(bool, true)
+    private_endpoint_network_policies             = optional(string, "Disabled")
     private_link_service_network_policies_enabled = optional(bool, true)
-    route_table_id                = optional(string)
-    service_endpoints             = optional(list(string), [])
-    service_endpoint_policy_ids   = optional(list(string), [])
+    route_table_id                                = optional(string)
+    service_endpoints                             = optional(list(string), [])
+    service_endpoint_policy_ids                   = optional(list(string), [])
     delegation = optional(object({
       name         = string
       service_name = string

@@ -46,7 +46,7 @@ output "subnet_ids" {
   value = var.use_inline_subnets ? {
     for subnet in azurerm_virtual_network.vnet.subnet :
     subnet.name => subnet.id
-  } : {
+    } : {
     for k, v in azurerm_subnet.subnets :
     v.name => v.id
   }
@@ -57,7 +57,7 @@ output "subnet_address_prefixes" {
   value = var.use_inline_subnets ? {
     for subnet in azurerm_virtual_network.vnet.subnet :
     subnet.name => subnet.address_prefixes
-  } : {
+    } : {
     for k, v in azurerm_subnet.subnets :
     v.name => v.address_prefixes
   }

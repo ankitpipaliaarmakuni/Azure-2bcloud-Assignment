@@ -41,14 +41,14 @@ resources:
 # Health checks
 livenessProbe:
   httpGet:
-    path: /health
+    path: /healthz
     port: 80
   initialDelaySeconds: 30
   periodSeconds: 10
 
 readinessProbe:
   httpGet:
-    path: /health
+    path: /healthz
     port: 80
   initialDelaySeconds: 10
   periodSeconds: 5

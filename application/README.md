@@ -27,5 +27,5 @@ docker push your-registry/node-docker-app:tag
 ## Endpoints
 
 - `GET /` - Root endpoint returning a simple greeting
-- `GET /health` - Health check endpoint with memory and uptime metrics
+- `GET /healthz` - Health check endpoint with memory and uptime metrics
 - `GET /stress` - Endpoint to simulate CPU load for testing

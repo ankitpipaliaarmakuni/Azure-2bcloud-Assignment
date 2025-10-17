@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/healthz', (req, res) => {
     const memUsage = process.memoryUsage();
     logger.info('Health check performed');
     res.status(200).json({

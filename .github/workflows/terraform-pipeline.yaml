@@ -105,10 +105,6 @@ jobs:
         run: |
           terraform init
 
-      - name: Create terraform.tfvars from GitHub secret
-        run: |
-          echo "${{ secrets.TERRAFORM_TFVARS }}" > terraform.tfvars
-
       - name: Terraform Plan
         id: plan
         run: |
@@ -142,10 +138,6 @@ jobs:
         run: |
           terraform init
 
-      - name: Create terraform.tfvars from GitHub secret
-        run: |
-          echo "${{ secrets.TERRAFORM_TFVARS }}" > terraform.tfvars
-
       - name: Terraform Apply
         id: apply
         run: |
@@ -176,10 +168,6 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init
-
-      - name: Create terraform.tfvars from GitHub secret
-        run: |
-          echo "${{ secrets.TERRAFORM_TFVARS }}" > terraform.tfvars
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -no-color

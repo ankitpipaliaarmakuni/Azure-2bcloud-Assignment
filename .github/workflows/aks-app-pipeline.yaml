@@ -26,6 +26,7 @@ env:
 
 jobs:
   build:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -47,6 +48,7 @@ jobs:
           ./application
 
   helm-lint:
+    timeout-minutes: 5
     name: Helm Lint and Template Test
     runs-on: ubuntu-latest
     steps:
@@ -70,6 +72,7 @@ jobs:
             --dry-run --debug
 
   deploy:
+    timeout-minutes: 10
     needs: build
     runs-on: ubuntu-latest
     steps:

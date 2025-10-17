@@ -39,6 +39,7 @@ permissions:
 
 jobs:
   terraform-validate:
+    timeout-minutes: 5
     name: Validate and Format
     runs-on: ubuntu-latest
     
@@ -76,6 +77,7 @@ jobs:
         run: terraform validate -no-color
 
   terraform-plan:
+    timeout-minutes: 10
     name: Plan Infrastructure
     needs: [terraform-validate]
     runs-on: ubuntu-latest
@@ -112,6 +114,7 @@ jobs:
         continue-on-error: true
 
   terraform-apply:
+    timeout-minutes: 10
     name: Apply Infrastructure
     needs: [terraform-plan]
     runs-on: ubuntu-latest

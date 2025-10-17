@@ -1,0 +1,60 @@
+{{- if .Values.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-hpa
+  labels:
+    app: {{ .Release.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- if .Values.autoscaling.behavior }}
+  behavior:
+    {{- if .Values.autoscaling.behavior.scaleDown }}
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.behavior.scaleDown.stabilizationWindowSeconds }}
+      policies:
+      {{- range .Values.autoscaling.behavior.scaleDown.policies }}
+      - type: {{ .type }}
+        value: {{ .value }}
+        periodSeconds: {{ .periodSeconds }}
+      {{- end }}
+      {{- if .Values.autoscaling.behavior.scaleDown.selectPolicy }}
+      selectPolicy: {{ .Values.autoscaling.behavior.scaleDown.selectPolicy }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.autoscaling.behavior.scaleUp }}
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.behavior.scaleUp.stabilizationWindowSeconds }}
+      policies:
+      {{- range .Values.autoscaling.behavior.scaleUp.policies }}
+      - type: {{ .type }}
+        value: {{ .value }}
+        periodSeconds: {{ .periodSeconds }}
+      {{- end }}
+      {{- if .Values.autoscaling.behavior.scaleUp.selectPolicy }}
+      selectPolicy: {{ .Values.autoscaling.behavior.scaleUp.selectPolicy }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

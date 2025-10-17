@@ -17,6 +17,7 @@ on:
 
 jobs:
   stress-test:
+    timeout-minutes: 12
     runs-on: ubuntu-latest
 
     steps:

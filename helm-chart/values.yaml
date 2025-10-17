@@ -74,6 +74,6 @@ autoscaling:
         value: 100
         periodSeconds: 15
       - type: Pods
-        value: 4
+        value: 2
         periodSeconds: 15
       selectPolicy: Max

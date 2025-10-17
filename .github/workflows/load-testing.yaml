@@ -1,0 +1,35 @@
+name: Manual Stress Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: "Test duration (e.g., 600s)"
+        required: false
+        default: "600s"
+      concurrency:
+        description: "Number of concurrent connections"
+        required: false
+        default: "2"
+      target_url:
+        description: "Target URL for stress test"
+        required: true
+
+jobs:
+  stress-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (optional)
+        uses: actions/checkout@v4
+
+      - name: Run Docker stress test with hey
+        run: |
+          echo "Running stress test..."
+          echo "Duration: ${{ github.event.inputs.duration }}"
+          echo "Concurrency: ${{ github.event.inputs.concurrency }}"
+          echo "Target: ${{ github.event.inputs.target_url }}"
+          docker run --rm williamyeh/hey \
+            -z ${{ github.event.inputs.duration }} \
+            -c ${{ github.event.inputs.concurrency }} \
+            ${{ github.event.inputs.target_url }}

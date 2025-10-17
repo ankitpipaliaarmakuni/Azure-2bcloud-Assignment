@@ -1,0 +1,79 @@
+replicaCount: 2
+
+image:
+  repository: ankitdemoacr.azurecr.io/demo-app
+  tag: "v2"
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  name: my-app-service
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+  protocol: TCP
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: webapprouting.kubernetes.azure.com
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  host: ""  # Empty host for IP-based access
+  path: /
+  pathType: Prefix
+
+# Resource limits
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 125m
+    memory: 128Mi
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 80
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 80
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+# Horizontal Pod Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max

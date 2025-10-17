@@ -1,0 +1,130 @@
+name: AKS Application Deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'application/**'
+      - 'helm-chart/**'
+      - '.github/workflows/aks-app-pipeline.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'application/**'
+      - 'helm-chart/**'
+      - '.github/workflows/aks-app-pipeline.yaml'
+  workflow_dispatch:
+
+env:
+  AZURE_CONTAINER_REGISTRY: ankitdemoacr.azurecr.io
+  IMAGE_NAME: demo-app
+  IMAGE_TAG: ${{ github.sha }}
+  RESOURCE_GROUP: Ankit-Pipalia-Candidate
+  CLUSTER_NAME: demo-aks
+  NAMESPACE: app
+  HELM_VERSION: '3.19.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Build and push image to ACR
+      id: build
+      run: |
+        az acr build \
+          --image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+          --image ${{ env.IMAGE_NAME }}:latest \
+          --registry ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          --file application/Dockerfile \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          ./application
+
+  helm-lint:
+    name: Helm Lint and Template Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Helm lint
+        run: helm lint ./helm-chart
+
+      - name: Helm template dry-run
+        run: |
+          helm template demo-app ./helm-chart \
+            --namespace ${{ env.NAMESPACE }} \
+            --set image.repository=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ env.IMAGE_TAG }} \
+            --dry-run --debug
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to AKS
+        id: deploy
+        run: |
+          helm upgrade --install demo-app ./helm-chart \
+            --namespace ${{ env.NAMESPACE }} \
+            --create-namespace \
+            --set image.repository=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ env.IMAGE_TAG }} \
+            --wait \
+            --timeout 10m \
+            --atomic \
+            --cleanup-on-fail \
+            --history-max 5
+
+      - name: Verify deployment
+        id: verify
+        run: |
+          echo "Checking deployment status..."
+          kubectl rollout status deployment/demo-app -n ${{ env.NAMESPACE }} --timeout=5m
+          
+          echo "Deployment successful!"
+          kubectl get all -n ${{ env.NAMESPACE }}
+          
+          # Get pod status
+          kubectl get pods -n ${{ env.NAMESPACE }} -o wide

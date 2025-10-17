@@ -1,0 +1,55 @@
+name: Application Stress Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      applicationUrl:
+        description: 'The complete application URL to test (e.g., http://your-app-ip/stress)'
+        required: true
+        type: string
+      testDuration:
+        description: 'Test duration in seconds'
+        required: false
+        default: '300'
+        type: string
+      concurrentRequests:
+        description: 'Number of concurrent requests'
+        required: false
+        default: '20'
+        type: string
+      chunks:
+        description: 'Number of chunks for stress-light test'
+        required: false
+        default: '10'
+        type: string
+
+jobs:
+  stress-test:
+    name: Run Stress Test
+    runs-on: windows-latest
+    timeout-minutes: 10
+    
+    env:
+      APP_URL: ${{ github.event.inputs.applicationUrl }}
+      TEST_DURATION: ${{ github.event.inputs.testDuration }}
+      CONCURRENT_REQUESTS: ${{ github.event.inputs.concurrentRequests }}
+      CHUNKS: ${{ github.event.inputs.chunks }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Stress Test
+        id: stress-test
+        run: |
+          # Create a here-string with the test parameters
+          $inputScript = @"
+          $env:APP_URL
+          $env:TEST_DURATION
+          $env:CONCURRENT_REQUESTS
+          $env:CHUNKS
+          "@
+
+          # Run the stress test script with the parameters
+          $inputScript | ./stress-test.ps1
+        shell: pwsh

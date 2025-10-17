@@ -74,7 +74,7 @@ jobs:
 
       - name: Terraform Validate
         id: validate
-        run: terraform validate -no-color -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        run: terraform validate -no-color
 
   terraform-plan:
     timeout-minutes: 10

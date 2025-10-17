@@ -49,64 +49,8 @@ app.get('/healthz', (req, res) => {
     });
 });
 
-// CPU-intensive stress test endpoint with minimal memory footprint
-app.get('/stress', (req, res) => {
-    logger.info('Stress test initiated');
-    
-    const startTime = Date.now();
-    const duration = parseInt(req.query.duration) || 2000; // Default 2 seconds
-    let result = 0;
-    let iterations = 0;
-    
-    // CPU-intensive calculations without memory allocation
-    // Using prime number calculation and mathematical operations
-    const performCPUWork = () => {
-        const endTime = startTime + duration;
-        
-        while (Date.now() < endTime) {
-            // Prime number checking (CPU intensive)
-            for (let i = 2; i < 10000; i++) {
-                let isPrime = true;
-                for (let j = 2; j <= Math.sqrt(i); j++) {
-                    if (i % j === 0) {
-                        isPrime = false;
-                        break;
-                    }
-                }
-                if (isPrime) result++;
-            }
-            
-            // Additional CPU-intensive math operations
-            for (let i = 0; i < 50000; i++) {
-                result += Math.sqrt(i) * Math.sin(i) * Math.cos(i);
-                result = result % 1000000; // Keep number manageable
-            }
-            
-            iterations++;
-            
-            // Check if time is up
-            if (Date.now() >= endTime) break;
-        }
-    };
-    
-    // Perform CPU work
-    performCPUWork();
-    
-    const memUsage = process.memoryUsage();
-    const cpuTime = Date.now() - startTime;
-    
-    res.status(200).json({
-        message: 'Stress test completed',
-        duration: `${cpuTime}ms`,
-        iterations: iterations,
-        cpuResult: Math.round(result),
-        memoryUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`,
-        timestamp: new Date().toISOString()
-    });
-});
-
 // Light stress endpoint - non-blocking with setImmediate
-app.get('/stress-light', async (req, res) => {
+app.get('/stress', async (req, res) => {
     logger.info('Light stress test initiated');
     
     const startTime = Date.now();

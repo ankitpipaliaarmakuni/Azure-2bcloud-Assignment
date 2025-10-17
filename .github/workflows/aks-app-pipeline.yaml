@@ -20,7 +20,7 @@ env:
   IMAGE_NAME: demo-app
   IMAGE_TAG: ${{ github.sha }}
   RESOURCE_GROUP: Ankit-Pipalia-Candidate
-  CLUSTER_NAME: demo-aks
+  CLUSTER_NAME: ankit-demo-aks
   NAMESPACE: app
   HELM_VERSION: '3.19.0'
 

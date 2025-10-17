@@ -105,7 +105,7 @@ jobs:
 
       - name: Terraform Init
         run: |
-          terraform init
+          terraform init -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
       - name: Terraform Plan
         id: plan
@@ -139,7 +139,7 @@ jobs:
 
       - name: Terraform Init
         run: |
-          terraform init
+          terraform init -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
       - name: Terraform Apply
         id: apply
@@ -170,7 +170,7 @@ jobs:
 
       - name: Terraform Init
         run: |
-          terraform init
+          terraform init -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -no-color

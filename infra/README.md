@@ -4,20 +4,18 @@ Terraform configuration for provisioning Azure infrastructure resources required
 
 ## Resources Provisioned
 
-- Azure Virtual Network with configurable subnets
+- Azure Virtual Network with dedicated subnet for AKS
 - Azure Container Registry for storing Docker images
 - Azure Kubernetes Service (AKS) cluster
 
 ## Directory Structure
 
-- `main.tf` - Main Terraform configuration file
+- `main.tf` - Main Terraform configuration file with resource definitions
 - `variables.tf` - Input variable definitions
 - `outputs.tf` - Output definitions
 - `provider.tf` - Azure provider configuration
 - `backend.tf` - State storage configuration
 - `terraform.tfvars` - Variable values (gitignored for security)
-- `modules/` - Reusable Terraform modules
-  - `virtual-network/` - Virtual network configuration module
 
 ## Usage
 

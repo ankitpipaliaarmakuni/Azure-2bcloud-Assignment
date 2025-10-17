@@ -4,16 +4,21 @@ data "azurerm_resource_group" "rg" {
   name = var.resource_group_name
 }
 
-module "vnet" {
-  source = "./modules/virtual-network"
+resource "azurerm_virtual_network" "vnet" {
+  name                = var.vnet_name
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  address_space       = var.vnet_address_space
+  tags                = var.tags
+}
 
-  virtual_network_name = var.vnet_name
+resource "azurerm_subnet" "aks_subnet" {
+  name                 = "aks-subnet"
   resource_group_name  = data.azurerm_resource_group.rg.name
-  location             = data.azurerm_resource_group.rg.location
-  address_space        = var.vnet_address_space
-  use_inline_subnets   = var.use_inline_vnet_subnets
-  subnets              = var.vnet_subnets
-  tags                 = var.tags
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.vnet_subnets[0].address_prefix]
+  
+  service_endpoints = var.vnet_subnets[0].service_endpoints
 }
 
 resource "azurerm_container_registry" "acr" {
@@ -48,7 +53,7 @@ module "aks" {
   sku_tier                        = var.aks_sku_tier
 
   vnet_subnet = {
-    id = module.vnet.subnet_ids["aks-subnet"]
+    id = azurerm_subnet.aks_subnet.id
   }
 
   web_app_routing = {
@@ -67,7 +72,7 @@ module "aks" {
           "workload-type" = "general"
         }
         vnet_subnet = {
-          id = module.vnet.subnet_ids["aks-subnet"]
+          id = azurerm_subnet.aks_subnet.id
         }
       }
     }

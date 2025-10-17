@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: ankitdemoacr.azurecr.io/demo-app
-  tag: "v2"
+  tag: "v1"
   pullPolicy: IfNotPresent
 
 # Service configuration
@@ -32,11 +32,11 @@ ingress:
 # Resource limits
 resources:
   limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
     cpu: 250m
     memory: 256Mi
-  requests:
-    cpu: 125m
-    memory: 128Mi
 
 # Health checks
 livenessProbe:

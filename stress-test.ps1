@@ -2,14 +2,24 @@
 # Stress Test Script for HTTP Applications
 # This script sends multiple concurrent requests to test application performance
 
+param(
+    [string]$Url,
+    [int]$Duration = 60,
+    [int]$Concurrent = 20,
+    [int]$Chunks = 10
+)
+
 #############################################################
 # Parameters and Configuration
 #############################################################
 
-# Get the complete application URL from user or stdin
+# Get the complete application URL from parameters or user input
 function Get-ApplicationURL {
-    if ($input.Count -gt 0) {
-        return $input[0].Trim()
+    if ($Url) {
+        if ($Url -notmatch "^https?://") {
+            return "http://$Url"
+        }
+        return $Url
     }
     $userURL = Read-Host "Enter the complete application URL including endpoint (e.g., http://your-app/stress)"
     if ($userURL -notmatch "^https?://") {
@@ -18,41 +28,44 @@ function Get-ApplicationURL {
     return $userURL
 }
 
-# Get test parameters from user or stdin
+# Get test parameters from script parameters or user input
 function Get-TestParameters {
     Write-Host "`n============================================" -ForegroundColor Cyan
     Write-Host "     Stress Test Configuration" -ForegroundColor Cyan
     Write-Host "============================================" -ForegroundColor Cyan
 
-    # Get test duration
-    if ($input.Count -gt 1) {
-        $testDuration = [int]($input[1].Trim())
-    } else {
-        $testDuration = Read-Host "Enter test duration in seconds [default: 60]"
-        if ([string]::IsNullOrWhiteSpace($testDuration) -or -not ($testDuration -match "^\d+$")) {
+    # Get test duration from parameter or user input
+    $testDuration = $Duration
+    if ($testDuration -le 0) {
+        $userDuration = Read-Host "Enter test duration in seconds [default: 60]"
+        if ([string]::IsNullOrWhiteSpace($userDuration) -or -not ($userDuration -match "^\d+$")) {
             $testDuration = 60
+        } else {
+            $testDuration = [int]$userDuration
         }
     }
 
-    # Get concurrent requests
-    if ($input.Count -gt 2) {
-        $concurrentRequests = [int]($input[2].Trim())
-    } else {
-        $concurrentRequests = Read-Host "Enter number of concurrent requests [default: 20]"
-        if ([string]::IsNullOrWhiteSpace($concurrentRequests) -or -not ($concurrentRequests -match "^\d+$")) {
+    # Get concurrent requests from parameter or user input
+    $concurrentRequests = $Concurrent
+    if ($concurrentRequests -le 0) {
+        $userConcurrent = Read-Host "Enter number of concurrent requests [default: 20]"
+        if ([string]::IsNullOrWhiteSpace($userConcurrent) -or -not ($userConcurrent -match "^\d+$")) {
             $concurrentRequests = 20
+        } else {
+            $concurrentRequests = [int]$userConcurrent
         }
     }
 
     # Get chunks for stress test parameters
     $params = @{}
     if ($appUrl -like "*/stress-light") {
-        if ($input.Count -gt 3) {
-            $chunks = [int]($input[3].Trim())
-        } else {
-            $chunks = Read-Host "Enter number of chunks [default: 10]"
-            if ([string]::IsNullOrWhiteSpace($chunks) -or -not ($chunks -match "^\d+$")) {
+        $chunks = $Chunks
+        if ($chunks -le 0) {
+            $userChunks = Read-Host "Enter number of chunks [default: 10]"
+            if ([string]::IsNullOrWhiteSpace($userChunks) -or -not ($userChunks -match "^\d+$")) {
                 $chunks = 10
+            } else {
+                $chunks = [int]$userChunks
             }
         }
         $params["chunks"] = $chunks

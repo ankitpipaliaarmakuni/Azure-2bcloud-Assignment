@@ -42,14 +42,5 @@ jobs:
       - name: Run Stress Test
         id: stress-test
         run: |
-          # Create a here-string with the test parameters
-          $inputScript = @"
-          $env:APP_URL
-          $env:TEST_DURATION
-          $env:CONCURRENT_REQUESTS
-          $env:CHUNKS
-          "@
-
-          # Run the stress test script with the parameters
-          $inputScript | ./stress-test.ps1
+          ./stress-test.ps1 -Url "$env:APP_URL" -Duration $env:TEST_DURATION -Concurrent $env:CONCURRENT_REQUESTS -Chunks $env:CHUNKS
         shell: pwsh
